@@ -248,10 +248,16 @@
     </footer>
 
     <script>
-        const apiKey = ""; // API Key is provided by the environment
+        // חשוב: אם אתה מעלה ל-GitHub, עליך להכניס כאן מפתח API מ-Google AI Studio
+        const apiKey = "AIzaSyA3DMERIwMsgqTy7bXTRZrnJzc61JQfJ2k"; 
 
         // --- Gemini API Logic ---
         async function callGemini(prompt, systemInstruction = "") {
+            // אם המפתח ריק, נציג הודעה למשתמש
+            if (!apiKey) {
+                return "שגיאה: חסר מפתח API. כדי להפעיל את מקסוול ב-GitHub, עליך להזין מפתח בתוך הקוד.";
+            }
+
             const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
             const payload = {
                 contents: [{ parts: [{ text: prompt }] }],
@@ -270,7 +276,7 @@
                     const result = await response.json();
                     return result.candidates?.[0]?.content?.parts?.[0]?.text || "מצטער, חלה שגיאה בעיבוד התשובה.";
                 } catch (error) {
-                    if (i === 4) return "שגיאת חיבור: לא הצלחתי לתקשר עם מקסוול כרגע. נסה שוב מאוחר יותר.";
+                    if (i === 4) return "שגיאת חיבור: לא הצלחתי לתקשר עם מקסוול כרגע. בדוק את מפתח ה-API שלך.";
                     await new Promise(r => setTimeout(r, delay));
                     delay *= 2;
                 }
@@ -284,12 +290,10 @@
             const text = input.value.trim();
             if (!text) return;
 
-            // Add User Message
             chatBox.innerHTML += `<div class="flex justify-end"><div class="bg-purple-50 p-3 rounded-2xl shadow-sm max-w-[80%] text-right"><p class="text-sm font-bold text-gray-500 mb-1">אתה:</p><p class="text-gray-700">${text}</p></div></div>`;
             input.value = "";
             chatBox.scrollTop = chatBox.scrollHeight;
 
-            // Add Loading
             const loadingId = "loading-" + Date.now();
             chatBox.innerHTML += `<div class="flex justify-start" id="${loadingId}"><div class="bg-white p-3 rounded-2xl shadow-sm border border-purple-100 max-w-[80%]"><p class="text-sm font-bold text-purple-600 mb-1">מקסוול:</p><p class="loading-dots text-gray-400">חושב</p></div></div>`;
             chatBox.scrollTop = chatBox.scrollHeight;
@@ -389,7 +393,6 @@
             updateMix();
         };
 
-        // Support Enter key for chat
         document.getElementById('ai-input').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') handleChat();
         });
